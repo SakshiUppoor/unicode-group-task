@@ -1,2 +1,5 @@
 # unicode-group-task
-# Shreyas Rami
+
+### Contributors
+
+- Shreyas Rami
