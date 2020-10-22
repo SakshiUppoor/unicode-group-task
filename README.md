@@ -1,3 +1,5 @@
 # unicode-group-task
 
-## Junaid Girkar
+### Contributors
+
+- Junaid Girkar
