@@ -5,21 +5,13 @@ from .managers import UserManager
 # Create your models here.
 
 
-def user_directory_path(instance, filename):
-
-    # file will be uploaded to MEDIA_ROOT / user_<id>/<filename>
-    return 'user_{0}/{1}'.format(instance.user.id, filename)
-
-
 class User(AbstractBaseUser):
     email = models.EmailField(verbose_name='email', max_length=60, unique=True)
     first_name = models.CharField(max_length=20)
     middle_name = models.CharField(max_length=20)
     last_name = models.CharField(max_length=20)
     dob = models.DateField(null=True, blank=True)
-    # profile_picture = models.ImageField(
-    #    upload_to=user_directory_path, height_field=None, width_field=None, max_length=100, blank=True)
-
+    profile_picture = models.ImageField(upload_to='image', blank=True)
     date_joined = models.DateField(
         verbose_name='date joined', auto_now_add=True)
     last_login = models.DateField(verbose_name='last login', auto_now=True)

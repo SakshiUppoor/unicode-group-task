@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from rest_framework import viewsets, generics, permissions
+from rest_framework.decorators import action
 from blogApp.models import User
 from blogApp.serializer import UserSerializer
 from rest_framework.authtoken.models import Token
@@ -11,12 +12,15 @@ from blogApp.serializer import LoginSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = [TokenAuthentication]
+    queryset = User.objects.all()
+    permission_classes = []  # IsAuthenticated]
+    serializer_class = UserSerializer
 
     def get_authenticators(self):
-        if self.action == 'destroy':
-            return super().get_authenticators()
-        return []
+        # if self.action == 'destroy':
+        return super().get_authenticators()
+        # return []
 
     def destroy(self, request, pk=None, **kwargs):
         try:
@@ -28,9 +32,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         return UserSerializer
-    # serializer_class = get_serializer_class()
-    queryset = User.objects.all()
-    permission_classes = []  # IsAuthenticated]
 
     def get_queryset(self):
         return User.objects.all()
