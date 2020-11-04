@@ -1,22 +1,48 @@
 from django.shortcuts import render
-from rest_framework import viewsets, generics, permissions
+from rest_framework import viewsets, generics, permissions, mixins
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from blogApp.models import User
 from blogApp.serializer import UserSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
-from blogApp.serializer import LoginSerializer
+from blogApp.serializer import LoginSerializer, RegisterUserSerializer
 # Create your views here.
 
+class RegisterUser(generics.GenericAPIView):
+    serializer_class = RegisterUserSerializer
+    permission_classes = []
+    def post(self, request):
+        serializer = RegisterUserSerializer(data=request.data)
+        data = {}
+        if serializer.is_valid():
+            user = serializer.save()
+            token = Token.objects.create(user=user).key
+            data = {
+                'response': "User account successfully created",
+                'token' : token
+            }
+        else:
+            data = serializer.errors
+        return Response(data)            
 
-class UserViewSet(viewsets.ModelViewSet):
-    authentication_classes = (TokenAuthentication,)
+class UserViewSet(#mixins.CreateModelMixin,
+                      mixins.ListModelMixin,
+                      mixins.RetrieveModelMixin,
+                      mixins.UpdateModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    authentication_classes = [TokenAuthentication]
+    queryset = User.objects.all()
+    permission_classes = []#IsAuthenticated]
+    serializer_class = UserSerializer
 
     def get_authenticators(self):
-        if self.action == 'destroy':
-            return super().get_authenticators()
-        return []
+        # if self.action == 'destroy':
+        return super().get_authenticators()
+        # return []
 
     def destroy(self, request, pk=None, **kwargs):
         try:
@@ -28,9 +54,6 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         return UserSerializer
-    # serializer_class = get_serializer_class()
-    queryset = User.objects.all()
-    permission_classes = []  # IsAuthenticated]
 
     def get_queryset(self):
         return User.objects.all()

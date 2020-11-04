@@ -10,4 +10,5 @@ router.register('users', UserViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('login/', ObtainAuthTokenView.as_view(), name='login'),
+    path('register/', RegisterUser.as_view(), name='register'),
 ]
