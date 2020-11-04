@@ -19,7 +19,7 @@ class RegisterUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(style={'input_type' : 'password'},write_only=True)
     class Meta:
         model = User
-        fields = ['first_name','middle_name', 'last_name','date_joined', 'last_login', 'profile_picture', 'dob', 'email', 'password','confirm_pass']
+        fields = ['first_name','middle_name', 'last_name', 'profile_picture', 'dob', 'email', 'password','confirm_pass']
 
     def save(self):
         user = User(
@@ -27,9 +27,6 @@ class RegisterUserSerializer(serializers.ModelSerializer):
             middle_name=self.validated_data['middle_name'],
             last_name=self.validated_data['last_name'],
             dob=self.validated_data['dob'],
-            date_joined = self.validated_data['date_joined'],
-            last_login = self.validated_data['last_login'],
-            is_active =True,
             profile_picture=self.validated_data['profile_picture'],
             email=self.validated_data['email']
 
