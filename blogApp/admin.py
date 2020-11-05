@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from blogApp.models import User
+from blogApp.models import User,Blogs
 
 # Register your models here.
 
@@ -27,3 +27,4 @@ class BaseUserAdmin(UserAdmin):
 
 
 admin.site.register(User, BaseUserAdmin)
+admin.site.register(Blogs)

@@ -40,3 +40,10 @@ class User(AbstractBaseUser):
     # Does this user have permission to view this app? (ALWAYS YES FOR SIMPLICITY)
     def has_module_perms(self, app_label):
         return True
+
+class Blogs(models.Model):
+    user=models.ForeignKey(User,on_delete=models.CASCADE)
+    created_on=models.CharField(max_length=30)
+    last_updated=models.CharField(max_length=30)
+    picture=models.ImageField(upload_to='image')
+    caption=models.CharField(max_length=500,blank=True)
