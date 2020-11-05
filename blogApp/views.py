@@ -138,6 +138,10 @@ class BlogDetail(APIView):
             return blog
         except Blogs.DoesNotExist:
             raise Http404
+    def get(self,request,pk):
+        blog=Blogs.objects.filter(user=request.user.id)
+        serializer=BlogSerializer(blog,many=True)
+        return Response(serializer.data)
 
     def put(self,request,pk):
         today=date.today()

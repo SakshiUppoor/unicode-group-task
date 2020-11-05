@@ -45,16 +45,4 @@ class BlogSerializer(serializers.ModelSerializer):
     class Meta:
         model=Blogs
         fields=['id','user','created_on','last_updated','picture','caption']
-    def newsave(self,user):
-        today=date.today()
-        d=today.strftime("%B %d, %Y")
-        blog=Blogs(
-        user=user,
-        created_on=d,
-        last_updated=d,
-        picture=self.validated_data['picture'],
-        caption=self.validated_data['caption'],
-
-        )
-        blog.save()
-        return blog
+    
