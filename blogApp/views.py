@@ -8,13 +8,14 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
-from blogApp.serializer import LoginSerializer, RegisterUserSerializer
+from blogApp.serializer import LoginSerializer, RegisterUserSerializer, CommentSerializer, ReplySerializer
 from rest_framework.views import APIView
 from rest_framework.parsers import FileUploadParser,FormParser,MultiPartParser,JSONParser
 from rest_framework.permissions import IsAuthenticated
 from datetime import date
 from django.http import Http404
 from blogApp.permissions import *
+
 # Create your views here.
 
 class RegisterUser(generics.GenericAPIView):
@@ -200,3 +201,31 @@ class UserProfileInfo(generics.GenericAPIView):
             }
             data.append(data3)
         return Response(data)
+
+class CommentViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (AlwaysTrue(),)
+        elif self.request.method == "POST" :
+            return (IsAuthenticated(),)
+        else:
+            return (IsCommentAuthor(),)
+
+
+
+class ReplyViewSet(viewsets.ModelViewSet):
+    serializer_class = ReplySerializer
+    queryset = Reply.objects.all()
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (AlwaysTrue(),)
+        elif self.request.method == "POST" :
+            return (IsAuthenticated(),)
+        else:
+            return (IsReplyAuthor(),)
+
+            
+
+

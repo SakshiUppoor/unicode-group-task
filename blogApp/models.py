@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
-from django.contrib.auth.models import User
 from .managers import UserManager
 # Create your models here.
 
@@ -19,9 +18,6 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.first_name + " " + self.middle_name+" " + self.last_name
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
@@ -47,3 +43,37 @@ class Blogs(models.Model):
     last_updated=models.DateField()
     picture=models.ImageField(upload_to='image')
     caption=models.CharField(max_length=500,blank=True)
+
+    
+
+class Comment(models.Model):
+    blog = models.ForeignKey(Blogs,on_delete=models.CASCADE)
+    comment_by = models.ForeignKey(User,on_delete=models.CASCADE)
+    comment_text = models.CharField(max_length=200)
+    created_on = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.blog)+'_'+str(self.comment_by)
+    
+    class Meta:
+        ordering = ['-last_updated']
+    
+    @property
+    def replies(self):
+        return self.reply_set.all()
+
+class Reply(models.Model):
+    reply_by = models.ForeignKey(User,on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment,on_delete=models.CASCADE)
+    reply_text = models.CharField(max_length=200)
+    created_on = models.DateTimeField(auto_now_add=True)
+    last_updated = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return str(self.comment)+'_'+str(self.reply_by)
+    
+    class Meta:
+        ordering = ['-last_updated']
+        verbose_name_plural = 'Replies'
+    
