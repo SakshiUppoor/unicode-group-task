@@ -89,25 +89,26 @@ class ObtainAuthTokenView(generics.CreateAPIView):
 
         return Response(context)
 
-class BlogPostView(APIView):
+class BlogPostView(generics.GenericAPIView):
     parser_classes=(FormParser,MultiPartParser,JSONParser)
     permission_classes = (IsAuthenticated,)
     serializer_class=BlogSerializer
+
 
 
     def post(self,request):
 
         user=User.objects.get(id=request.user.id)
         today=date.today()
-        d=today.strftime("%B %d, %Y")
+        print(today)
         picture=request.data.get("picture")
         caption=request.data.get("caption")
         if caption==None:
             caption=""
 
         blog=Blogs.objects.create(user=user,
-                                created_on=d,
-                                last_updated=d,
+                                created_on=today,
+                                last_updated=today,
                                 picture=picture,
                                 caption=caption,
                                 )
@@ -128,9 +129,10 @@ class BlogPostView(APIView):
         return Response(serializer.data)
 
 
-class BlogDetail(APIView):
+class BlogDetail(generics.GenericAPIView):
     parser_classes=(FormParser,MultiPartParser,JSONParser)
     permission_classes = (IsAuthenticated,BlogDetails,)
+    serializer_class=BlogSerializer
 
     def get_object(self,pk):
         try:
@@ -139,13 +141,14 @@ class BlogDetail(APIView):
         except Blogs.DoesNotExist:
             raise Http404
     def get(self,request,pk):
+        
         blog=Blogs.objects.filter(user=request.user.id)
         serializer=BlogSerializer(blog,many=True)
         return Response(serializer.data)
 
     def put(self,request,pk):
         today=date.today()
-        d=today.strftime("%B %d, %Y")
+
         blog=self.get_object(pk)
         picture=request.data.get('picture')
         caption=request.data.get('caption')
@@ -158,7 +161,7 @@ class BlogDetail(APIView):
         data={
         "user":blog.user.pk,
         "created_on":blog.created_on,
-        "last_updated":d,
+        "last_updated":today,
         "picture":picture,
         "caption":caption
         }
@@ -175,9 +178,10 @@ class BlogDetail(APIView):
         }
         return Response(data)
 
-class UserProfileInfo(APIView):
+class UserProfileInfo(generics.GenericAPIView):
     parser_classes=(FormParser,MultiPartParser,JSONParser)
     permission_classes = (IsAuthenticated,)
+    serializer_class=BlogSerializer
 
     def get(self,request):
         user=User.objects.all()

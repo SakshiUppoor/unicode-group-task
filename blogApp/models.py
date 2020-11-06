@@ -43,7 +43,7 @@ class User(AbstractBaseUser):
 
 class Blogs(models.Model):
     user=models.ForeignKey(User,on_delete=models.CASCADE)
-    created_on=models.CharField(max_length=30)
-    last_updated=models.CharField(max_length=30)
+    created_on=models.DateField()
+    last_updated=models.DateField()
     picture=models.ImageField(upload_to='image')
     caption=models.CharField(max_length=500,blank=True)
