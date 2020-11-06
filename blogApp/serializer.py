@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from blogApp.models import User
+from blogApp.models import User,Blogs
+from datetime import date
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -38,3 +39,10 @@ class RegisterUserSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class BlogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model=Blogs
+        fields=['id','user','created_on','last_updated','picture','caption']
+    

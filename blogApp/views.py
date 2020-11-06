@@ -2,13 +2,19 @@ from django.shortcuts import render
 from rest_framework import viewsets, generics, permissions, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
-from blogApp.models import User
-from blogApp.serializer import UserSerializer
+from blogApp.models import User,Blogs
+from blogApp.serializer import UserSerializer,BlogSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from django.contrib.auth import authenticate
 from rest_framework.response import Response
 from blogApp.serializer import LoginSerializer, RegisterUserSerializer
+from rest_framework.views import APIView
+from rest_framework.parsers import FileUploadParser,FormParser,MultiPartParser,JSONParser
+from rest_framework.permissions import IsAuthenticated
+from datetime import date
+from django.http import Http404
+from blogApp.permissions import *
 # Create your views here.
 
 class RegisterUser(generics.GenericAPIView):
@@ -26,7 +32,7 @@ class RegisterUser(generics.GenericAPIView):
             }
         else:
             data = serializer.errors
-        return Response(data)            
+        return Response(data)
 
 class UserViewSet(#mixins.CreateModelMixin,
                       mixins.ListModelMixin,
@@ -82,3 +88,115 @@ class ObtainAuthTokenView(generics.CreateAPIView):
             context['error_message'] = 'Invalid credentials'
 
         return Response(context)
+
+class BlogPostView(generics.GenericAPIView):
+    parser_classes=(FormParser,MultiPartParser,JSONParser)
+    permission_classes = (IsAuthenticated,)
+    serializer_class=BlogSerializer
+
+
+
+    def post(self,request):
+
+        user=User.objects.get(id=request.user.id)
+        today=date.today()
+        print(today)
+        picture=request.data.get("picture")
+        caption=request.data.get("caption")
+        if caption==None:
+            caption=""
+
+        blog=Blogs.objects.create(user=user,
+                                created_on=today,
+                                last_updated=today,
+                                picture=picture,
+                                caption=caption,
+                                )
+        blog.save()
+        serializer=BlogSerializer(blog)
+
+
+        return Response(serializer.data)
+
+    def get(self,request):
+
+
+        blog=Blogs.objects.filter(user=request.user.id)
+        print(blog)
+
+        serializer=BlogSerializer(blog,many=True)
+
+        return Response(serializer.data)
+
+
+class BlogDetail(generics.GenericAPIView):
+    parser_classes=(FormParser,MultiPartParser,JSONParser)
+    permission_classes = (IsAuthenticated,BlogDetails,)
+    serializer_class=BlogSerializer
+
+    def get_object(self,pk):
+        try:
+            blog=Blogs.objects.get(pk=pk)
+            return blog
+        except Blogs.DoesNotExist:
+            raise Http404
+    def get(self,request,pk):
+        
+        blog=Blogs.objects.filter(user=request.user.id)
+        serializer=BlogSerializer(blog,many=True)
+        return Response(serializer.data)
+
+    def put(self,request,pk):
+        today=date.today()
+
+        blog=self.get_object(pk)
+        picture=request.data.get('picture')
+        caption=request.data.get('caption')
+        if caption is None:
+            caption=blog.caption
+        if picture is None:
+            picture=blog.picture
+
+
+        data={
+        "user":blog.user.pk,
+        "created_on":blog.created_on,
+        "last_updated":today,
+        "picture":picture,
+        "caption":caption
+        }
+        serializer=BlogSerializer(blog,data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data)
+
+    def delete(self,request,pk):
+        blog=self.get_object(pk)
+        blog.delete()
+        data={
+        "message":"deleted successfully"
+        }
+        return Response(data)
+
+class UserProfileInfo(generics.GenericAPIView):
+    parser_classes=(FormParser,MultiPartParser,JSONParser)
+    permission_classes = (IsAuthenticated,)
+    serializer_class=BlogSerializer
+
+    def get(self,request):
+        user=User.objects.all()
+        data=[]
+        for i in user:
+            lst2=[]
+            blog=Blogs.objects.filter(user=i.id)
+            for j in blog:
+                serializer=BlogSerializer(j)
+                lst2.append(serializer.data)
+
+            data3={
+            'name':i.first_name +" "+ i.last_name,
+
+            'blogs':lst2
+            }
+            data.append(data3)
+        return Response(data)
