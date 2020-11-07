@@ -7,6 +7,9 @@ from django.conf import settings
 router = DefaultRouter()
 
 router.register('users', UserViewSet)
+router.register('comments', CommentViewSet)
+router.register('replies', ReplyViewSet)
+
 
 
 
